@@ -25,12 +25,12 @@ PROVIDES = "jailhouse"
 
 PV = "2023.03+git${SRCPV}"
 
-SRCBRANCH = "lf-6.18.20_2.0.0"
+SRCBRANCH = "lf-6.18.37_2.1.0"
 IMX_JAILHOUSE_SRC ?= "git://github.com/nxp-imx/imx-jailhouse.git;protocol=https"
 SRC_URI = "${IMX_JAILHOUSE_SRC};branch=${SRCBRANCH} \
            file://arm-arm64-Makefile-Remove-march-option-from-Makefile.patch \
            "
-SRCREV = "8d6d397f7f88f4bd0d9f99933a13163266d09099"
+SRCREV = "8ce492bb2c69e486b8afb655f87d8b4708c79d89"
 
 inherit module bash-completion deploy setuptools3
 
@@ -69,6 +69,11 @@ do_compile:prepend() {
     # explicity call make to build the kernel module and tools
     oe_runmake
 }
+
+# The module only reaches the kernel through make-mod-scripts, whose
+# output can stay hash-equivalent when the kernel changes, leaving a
+# kernel-module-jailhouse package built for the previous kernel version.
+do_compile[depends] += "virtual/kernel:do_shared_workdir"
 
 do_install:append() {
     # setuptools3 already installs pyjailhouse. PIP=true keeps the
