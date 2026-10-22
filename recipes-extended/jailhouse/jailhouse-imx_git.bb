@@ -71,7 +71,11 @@ do_compile:prepend() {
 }
 
 do_install:append() {
-    oe_runmake DESTDIR=${D} install
+    # setuptools3 already installs pyjailhouse. PIP=true keeps the
+    # Makefile's pip check passing, so the Python helpers still get
+    # installed, but skips its own 'pip install', which needs network
+    # access and would install into the native sysroot path under ${D}.
+    oe_runmake DESTDIR=${D} PIP=true install
 
     install -d ${D}${CELL_DIR}
     install ${B}/configs/${JH_ARCH}/*.cell ${D}${CELL_DIR}/
